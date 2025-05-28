@@ -60,7 +60,7 @@ export async function runBenchmark(argv: BenchmarkArgs): Promise<void> {
     socket: {
       host: argv.host,
       port: argv.port,
-      connectTimeout: 120000,
+      connectTimeout: argv["redis-timeout"],
     },
     username: argv.user || undefined,
     password: argv.a || undefined,
@@ -74,7 +74,7 @@ export async function runBenchmark(argv: BenchmarkArgs): Promise<void> {
         socket: {
           host: argv.host,
           port: argv.port,
-          connectTimeout: 120000,
+          connectTimeout: argv["redis-timeout"],
         },
       },
     ],
@@ -84,7 +84,7 @@ export async function runBenchmark(argv: BenchmarkArgs): Promise<void> {
       username: argv.user || undefined,
       password: argv.a || undefined,
       socket: {
-        connectTimeout: 120000,
+        connectTimeout: argv["redis-timeout"],
       },
     },
     minimizeConnections: true,
@@ -177,7 +177,6 @@ export async function runBenchmark(argv: BenchmarkArgs): Promise<void> {
       totalMessagesRef.value,
       totalSubscribedRef.value,
       messageRateTs,
-      rttAccumulator,
       rttHistogram,
       perSecondStats
     );

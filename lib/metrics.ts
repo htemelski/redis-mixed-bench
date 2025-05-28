@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import * as hdr from 'hdr-histogram-js';
 
 interface BenchmarkConfig {
-  'messages': number;
   'measure-rtt-latency': boolean;
   'json-out-file': string;
   host: string;
@@ -24,7 +23,6 @@ interface BenchmarkResult {
   MessageRate: number;
   TotalMessages: number;
   TotalSubscriptions: number;
-  MessagesPerChannel: number;
   MessageRateTs: number[];
   OSSDistributedSlots: boolean;
   Addresses: string[];
@@ -221,7 +219,6 @@ export function writeFinalResults(
   totalMessages: number,
   totalSubscribed: number,
   messageRateTs: number[],
-  rttAccumulator: RttAccumulator | null,
   rttHistogram: hdr.Histogram | null,
   perSecondStats: PerSecondStat[]
 ): void {
@@ -238,7 +235,6 @@ export function writeFinalResults(
     MessageRate: messageRate,
     TotalMessages: totalMessages,
     TotalSubscriptions: totalSubscribed,
-    MessagesPerChannel: argv['messages'],
     MessageRateTs: messageRateTs,
     OSSDistributedSlots: argv['oss-cluster-api-distribute-subscribers'],
     Addresses: [`${argv.host}:${argv.port}`],

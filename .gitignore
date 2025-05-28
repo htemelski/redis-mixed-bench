@@ -34,3 +34,4 @@ dist/
 build/
 
 dump.rdb
+test-results_*

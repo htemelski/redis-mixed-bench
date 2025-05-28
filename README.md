@@ -28,12 +28,28 @@ This benchmark tool allows testing Redis performance with various parameters:
 
 ## Available Options
 
+### Basic Configuration
 - `--clients=N`: Number of concurrent connections to use (default: 1)
 - `--test-time=N`: Duration of the test in seconds (default: 0, runs indefinitely)
 - `--data-size=N`: Size of the payload data in bytes (default: 300)
 - `--rate-limit=N`: Maximum operations per second (default: 0, no limit)
-- `--measure-rtt-latency`: Enable/disable latency measurements (default: true)
-- `--json-out-file=FILE`: Write results to JSON file
-- `--rand-seed=N`: Random seed for reproducibility (default: 12345)
 - `--host=ADDR`: Redis server address (default: 127.0.0.1)
 - `--port=N`: Redis server port (default: 6379)
+
+### Authentication
+- `--a=PASSWORD`: Password for Redis authentication
+- `--user=USERNAME`: Username for Redis ACL authentication
+
+### Cluster Mode
+- `--oss-cluster-api-distribute-subscribers`: Enable Redis OSS Cluster mode (default: false)
+- `--slot-refresh-interval=N`: Cluster slot refresh interval in milliseconds (default: -1)
+
+### Monitoring and Output
+- `--measure-rtt-latency`: Enable/disable latency measurements (default: true)
+- `--json-out-file=FILE`: Write results to JSON file
+- `--client-update-tick=N`: Update interval for progress display in seconds (default: 1)
+- `--verbose`: Enable verbose logging (default: false)
+
+### Advanced Settings
+- `--rand-seed=N`: Random seed for reproducibility (default: 12345)
+- `--redis-timeout=N`: Redis connection timeout in milliseconds (default: 120000)

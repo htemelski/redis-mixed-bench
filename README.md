@@ -17,13 +17,13 @@ This benchmark tool allows testing Redis performance with various parameters:
 
 ```bash
 # Run directly with ts-node
-./run-bench-mixed.sh <instances> [benchmark_args...]
+./scripts/run-bench-mixed.sh <instances> [benchmark_args...]
 
 # Example with 3 instances, 100 clients per instance, running for 60 seconds
-./run-bench-mixed.sh 3 --clients=100 --test-time=60
+./scripts/run-bench-mixed.sh 3 --clients=100 --test-time=60
 
 # Example with rate limiting (500 operations per second) (rate limit is per instance)
-./run-bench-mixed.sh 1 --clients=10 --test-time=30 --rate-limit=500
+./scripts/run-bench-mixed.sh 1 --clients=10 --test-time=30 --rate-limit=500
 ```
 
 ## Available Options
@@ -48,7 +48,6 @@ This benchmark tool allows testing Redis performance with various parameters:
 - `--measure-rtt-latency`: Enable/disable latency measurements (default: true)
 - `--json-out-file=FILE`: Write results to JSON file
 - `--client-update-tick=N`: Update interval for progress display in seconds (default: 1)
-- `--verbose`: Enable verbose logging (default: false)
 
 ### Advanced Settings
 - `--rand-seed=N`: Random seed for reproducibility (default: 12345)

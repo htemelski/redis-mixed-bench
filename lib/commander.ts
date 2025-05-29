@@ -24,11 +24,11 @@ async function commanderRoutine(
   isRunningRef: RunningRef,
   totalMessagesRef: MessagesRef,
   rttAccumulator?: RttAccumulator | null,
-  commandStats: CommandStats = { set: 0, get: 0, hSet: 0, hGet: 0 },
-  rttHistogram?: any | null,
   rateLimiter?: RateLimiter | null
 ): Promise<CommandStats> {
     await client.connect();
+
+    const commandStats: CommandStats = { set: 0, get: 0, hSet: 0, hGet: 0 };
 
     // Define keys and payload
     const payload = 'A'.repeat(dataSize);

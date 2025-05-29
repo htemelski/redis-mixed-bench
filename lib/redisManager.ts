@@ -14,7 +14,7 @@ interface RunningRef {
 }
 
 export async function runBenchmark(argv: BenchmarkArgs): Promise<void> {
-  console.log(`pubsub-sub-bench (node-redis version)`);
+  console.log(`redis-mixed-bench (node-redis version)`);
   console.log(`Using random seed: ${argv["rand-seed"]}`);
   Math.random = seedrandom(argv["rand-seed"].toString());
 
@@ -22,9 +22,6 @@ export async function runBenchmark(argv: BenchmarkArgs): Promise<void> {
     console.log("RTT measurement enabled.");
   }
 
-  if (argv.verbose) {
-    console.log("Verbose mode enabled.");
-  }
 
   // Shared mutable state (as references)
   const totalMessagesRef: CountRef = { value: 0 };
@@ -119,8 +116,6 @@ export async function runBenchmark(argv: BenchmarkArgs): Promise<void> {
         isRunningRef,
         totalMessagesRef,
         rttAccumulator,
-        { set: 0, get: 0, hSet: 0, hGet: 0 },
-        rttHistogram,
         rateLimiter
       )
     );

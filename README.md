@@ -48,7 +48,6 @@ This benchmark tool allows testing Redis performance with various parameters:
 - `--measure-rtt-latency`: Enable/disable latency measurements (default: true)
 - `--json-out-file=FILE`: Write results to JSON file
 - `--client-update-tick=N`: Update interval for progress display in seconds (default: 1)
-- `--verbose`: Enable verbose logging (default: false)
 
 ### Advanced Settings
 - `--rand-seed=N`: Random seed for reproducibility (default: 12345)

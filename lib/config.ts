@@ -13,7 +13,6 @@ export interface BenchmarkArgs {
   'rand-seed': number;
   'oss-cluster-api-distribute-subscribers': boolean;
   'slot-refresh-interval': number;
-  verbose: boolean;
   'measure-rtt-latency': boolean;
   'redis-timeout': number;
   'rate-limit': number;
@@ -33,7 +32,6 @@ export function parseArgs(): BenchmarkArgs {
     .option("rand-seed", { default: 12345 })
     .option("oss-cluster-api-distribute-subscribers", { default: false })
     .option("slot-refresh-interval", { default: -1 })
-    .option("verbose", { default: false })
     .option("measure-rtt-latency", { default: true })
     .option("redis-timeout", { default: 120000 })
     .option("rate-limit", { description: "Max operations per second (0 for unlimited)", default: 0 })

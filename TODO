@@ -1,2 +1,0 @@
-Randomize keys in order to have a mix of cache hits and misses and distribute the load across shards
-    Nice to have: Set a ratio of cache hits:misses when doing gets 

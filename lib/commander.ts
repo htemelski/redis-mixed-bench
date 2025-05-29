@@ -23,23 +23,22 @@ async function commanderRoutine(
   client: ReturnType<typeof createCluster> | ReturnType<typeof createClient>,
   isRunningRef: RunningRef,
   totalMessagesRef: MessagesRef,
+  getKeys: Array<string>,
+  setKeys: Array<string>,
+  hgetKeys: Array<string>,
+  hsetKeys: Array<string>,
+  hashField: string,
   rttAccumulator?: RttAccumulator | null,
-  rateLimiter?: RateLimiter | null
+  rateLimiter?: RateLimiter | null,
 ): Promise<CommandStats> {
     await client.connect();
 
     const commandStats: CommandStats = { set: 0, get: 0, hSet: 0, hGet: 0 };
-
-    // Define keys and payload
     const payload = 'A'.repeat(dataSize);
-    const stringKey = 'benchmark:string:key';
-    const hashKey = 'benchmark:hash:key';
-    const field = 'benchmark:field';
-    
     let commandType: number = 0;
+    const field = hashField;
     while (isRunningRef.value) {
       try {
-        // Apply rate limiting if enabled
         if (rateLimiter) {
           await rateLimiter.acquire();
         }
@@ -48,22 +47,29 @@ async function commanderRoutine(
         let rtt = 0;
 
         const startTime = performance.now();
-        
+      
         switch (commandType) {
         case 0:
-          await client.set(stringKey, payload);
+          const setKey = setKeys[Math.floor(Math.random() * setKeys.length)]
+          await client.set(setKey, payload);
           commandStats.set++;
           break;
         case 1:
-          await client.get(stringKey);
+          const getKey = getKeys[Math.floor(Math.random() * getKeys.length)]
+
+          await client.get(getKey);
           commandStats.get++;
           break;
         case 2:
-          await client.hSet(hashKey, field, payload);
+          const hsetKey = hsetKeys[Math.floor(Math.random() * hsetKeys.length)]
+
+          await client.hSet(hsetKey, field, payload);
           commandStats.hSet++;
           break;
         case 3:
-          await client.hGet(hashKey, field);
+          const hgetKey = hgetKeys[Math.floor(Math.random() * hgetKeys.length)]
+
+          await client.hGet(hgetKey, field);
           commandStats.hGet++;
           break;
         }

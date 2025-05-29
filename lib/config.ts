@@ -21,6 +21,9 @@ export interface BenchmarkArgs {
   'tls-ca': string;
   'tls-key-passphrase': string;
   'reject-unauthorized': boolean;
+  'keys-count': number;
+  'hit-rate': number;
+  'key-prefix': string;
 }
 
 export function parseArgs(): BenchmarkArgs {
@@ -45,6 +48,9 @@ export function parseArgs(): BenchmarkArgs {
     .option("tls-ca", { description: "Path to CA certificate file", default: "" })
     .option("tls-key-passphrase", { description: "Passphrase for encrypted private key file", default: "" })
     .option("reject-unauthorized", { description: "Reject unauthorized TLS/SSL certificates", default: true })
+    .option("keys-count", { description: "Number of keys to be used", default: 16384 })
+    .option("hit-rate", { description: "average hit rate for get and hget", default: 100 })
+    .option("key-prefix", { description: "prefix for the keys used in the benchmark", default: "mixed-bench" })
     .help()
     .argv as BenchmarkArgs;
 }

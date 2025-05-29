@@ -27,6 +27,9 @@ This benchmark tool allows testing Redis performance with various parameters:
 
 # Example with TLS enabled
 ./scripts/run-bench-mixed.sh 1 --clients=10 --tls --tls-ca=/path/to/ca.crt --tls-cert=/path/to/client.crt --tls-key=/path/to/client.key
+
+# Example with key distribution and hit rate configuration
+./scripts/run-bench-mixed.sh 1 --clients=10 --keys-count=1000 --hit-rate=80 --key-prefix=myapp
 ```
 
 ## Available Options
@@ -53,6 +56,11 @@ This benchmark tool allows testing Redis performance with various parameters:
 
 ### Cluster Mode
 - `--oss-cluster-api-distribute-subscribers`: Enable Redis OSS Cluster mode (default: false)
+
+### Key Distribution and Hit Rate
+- `--keys-count=N`: Number of keys to be used (default: 16384)
+- `--hit-rate=N`: Average hit rate percentage for GET and HGET operations (default: 100)
+- `--key-prefix=PREFIX`: Prefix for the keys used in the benchmark (default: "mixed-bench")
 
 ### Monitoring and Output
 - `--measure-rtt-latency`: Enable/disable latency measurements (default: true)

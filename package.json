@@ -1,12 +1,11 @@
 {
-    "name": "pubsub-sub-bench",
+    "name": "bench-mixed",
     "version": "0.1.0",
-    "main": "dist/bin/pubsub-sub-bench.js",
     "license": "Apache-2.0",
     "dependencies": {
         "cluster-key-slot": "^1.1.0",
         "hdr-histogram-js": "^2.0.1",
-        "redis": "^4.7.1",
+        "redis": "^4.7.0",
         "seedrandom": "^3.0.5",
         "yargs": "^17.7.2"
     },
@@ -22,7 +21,7 @@
     },
     "scripts": {
         "build": "tsc",
-        "start": "npm run build && node dist/bin/pubsub-sub-bench.js",
+        "start": "npm run build && node dist/bin/bench-mixed.js",
         "start:ts": "ts-node bin/bench-mixed.ts",
         "format": "prettier --write '**/*.{ts,json}'",
         "watch": "tsc -w"

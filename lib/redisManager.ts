@@ -14,7 +14,7 @@ interface RunningRef {
 }
 
 export async function runBenchmark(argv: BenchmarkArgs): Promise<void> {
-  console.log(`pubsub-sub-bench (node-redis version)`);
+  console.log(`redis-mixed-bench (node-redis version)`);
   console.log(`Using random seed: ${argv["rand-seed"]}`);
   Math.random = seedrandom(argv["rand-seed"].toString());
 

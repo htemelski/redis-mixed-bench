@@ -1,9 +1,11 @@
-import { createClient, createCluster, RedisClientOptions, RedisClusterOptions, RedisClientType, RedisClusterType } from "redis";
+import { createClient, createCluster, RedisClientOptions, RedisClusterOptions } from "redis";
+import { RedisSocketOptions } from "@redis/client/dist/lib/client/socket"
 import { commanderRoutine, CommandStats } from "./commander";
 import { updateCLI, writeFinalResults, createRttHistogram, RttAccumulator } from "./metrics";
 import { RateLimiter } from "./rateLimiter";
 import seedrandom from "seedrandom";
 import { BenchmarkArgs } from "./config";
+import * as fs from 'fs';
 
 interface CountRef {
   value: number;
@@ -22,6 +24,13 @@ export async function runBenchmark(argv: BenchmarkArgs): Promise<void> {
     console.log("RTT measurement enabled.");
   }
 
+  if (argv.tls) {
+    console.log("TLS enabled.");
+    if (argv["tls-ca"]) console.log("Using CA certificate from:", argv["tls-ca"]);
+    if (argv["tls-cert"]) console.log("Using client certificate from:", argv["tls-cert"]);
+    if (argv["tls-key"]) console.log("Using client key from:", argv["tls-key"]);
+    if (argv["tls-key-passphrase"]) console.log("Using key passphrase:", argv["tls-key-passphrase"]);
+  }
 
   // Shared mutable state (as references)
   const totalMessagesRef: CountRef = { value: 0 };
@@ -53,26 +62,31 @@ export async function runBenchmark(argv: BenchmarkArgs): Promise<void> {
     rttAccumulator.setHistogram(rttHistogram);
   }
 
+  // Create socket options with TLS configuration if enabled
+  const socketOptions: RedisSocketOptions = {
+    host: argv.host,
+    port: argv.port,
+    connectTimeout: argv["redis-timeout"],
+    tls: argv.tls,
+    rejectUnauthorized: argv["reject-unauthorized"] ? argv["reject-unauthorized"] : undefined,
+    key: argv["tls-key"] ? await fs.promises.readFile(argv["tls-key"], 'utf-8') : undefined,
+    passphrase: argv["tls-key-passphrase"] ? argv["tls-key-passphrase"] : undefined,
+    cert: argv["tls-cert"] ? await fs.promises.readFile(argv["tls-cert"], 'utf-8') : undefined,
+    ca: argv["tls-ca"] ? await fs.promises.readFile(argv["tls-ca"], 'utf-8') : undefined,
+  };
+
   const clientOptions: RedisClientOptions = {
-    socket: {
-      host: argv.host,
-      port: argv.port,
-      connectTimeout: argv["redis-timeout"],
-    },
+    socket: socketOptions,
     username: argv.user || undefined,
     password: argv.a || undefined,
-    disableClientInfo: true,
+    disableClientInfo: true
   };
 
   const clusterOptions: RedisClusterOptions = {
     rootNodes: [
       {
         disableClientInfo: true,
-        socket: {
-          host: argv.host,
-          port: argv.port,
-          connectTimeout: argv["redis-timeout"],
-        },
+        socket: socketOptions
       },
     ],
     useReplicas: false,
@@ -80,14 +94,11 @@ export async function runBenchmark(argv: BenchmarkArgs): Promise<void> {
       disableClientInfo: true,
       username: argv.user || undefined,
       password: argv.a || undefined,
-      socket: {
-        connectTimeout: argv["redis-timeout"],
-      },
+      socket: socketOptions
     },
     minimizeConnections: true,
   };
 
-  console.log(`Using ${argv["slot-refresh-interval"]} slot-refresh-interval`);
   console.log(`Using ${argv["redis-timeout"]} redis-timeout`);
 
   let clients: (ReturnType<typeof createCluster> | ReturnType<typeof createClient>)[] = [];

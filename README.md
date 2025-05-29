@@ -24,6 +24,9 @@ This benchmark tool allows testing Redis performance with various parameters:
 
 # Example with rate limiting (500 operations per second) (rate limit is per instance)
 ./scripts/run-bench-mixed.sh 1 --clients=10 --test-time=30 --rate-limit=500
+
+# Example with TLS enabled
+./scripts/run-bench-mixed.sh 1 --clients=10 --tls --tls-ca=/path/to/ca.crt --tls-cert=/path/to/client.crt --tls-key=/path/to/client.key
 ```
 
 ## Available Options
@@ -40,9 +43,16 @@ This benchmark tool allows testing Redis performance with various parameters:
 - `--a=PASSWORD`: Password for Redis authentication
 - `--user=USERNAME`: Username for Redis ACL authentication
 
+### TLS/SSL Configuration
+- `--tls`: Enable TLS/SSL connection (default: false)
+- `--tls-key=FILE`: Path to client private key file
+- `--tls-cert=FILE`: Path to client certificate file
+- `--tls-ca=FILE`: Path to CA certificate file
+- `--tls-key-passphrase=PASS`: Passphrase for encrypted private key file
+- `--reject-unauthorized`: Reject unauthorized TLS/SSL certificates (default: true)
+
 ### Cluster Mode
 - `--oss-cluster-api-distribute-subscribers`: Enable Redis OSS Cluster mode (default: false)
-- `--slot-refresh-interval=N`: Cluster slot refresh interval in milliseconds (default: -1)
 
 ### Monitoring and Output
 - `--measure-rtt-latency`: Enable/disable latency measurements (default: true)

@@ -17,7 +17,6 @@ interface CommandStats {
   hGet: number;
 }
 
-
 async function commanderRoutine(
   dataSize: number,
   client: ReturnType<typeof createCluster> | ReturnType<typeof createClient>,
@@ -36,7 +35,6 @@ async function commanderRoutine(
     const commandStats: CommandStats = { set: 0, get: 0, hSet: 0, hGet: 0 };
     const payload = 'A'.repeat(dataSize);
     let commandType: number = 0;
-    const field = hashField;
     while (isRunningRef.value) {
       try {
         if (rateLimiter) {
@@ -46,35 +44,48 @@ async function commanderRoutine(
         commandType = Math.floor(Math.random() * 4);
         let rtt = 0;
 
-        const startTime = performance.now();
-      
+        let startTime: number = 0;
+        let endTime: number = 0;
+
         switch (commandType) {
         case 0:
           const setKey = setKeys[Math.floor(Math.random() * setKeys.length)]
+
+          startTime = performance.now();
           await client.set(setKey, payload);
+          endTime = performance.now();
+
           commandStats.set++;
           break;
         case 1:
           const getKey = getKeys[Math.floor(Math.random() * getKeys.length)]
 
+          startTime = performance.now();
           await client.get(getKey);
+          endTime = performance.now();
+
           commandStats.get++;
           break;
         case 2:
           const hsetKey = hsetKeys[Math.floor(Math.random() * hsetKeys.length)]
 
-          await client.hSet(hsetKey, field, payload);
+          startTime = performance.now();
+          await client.hSet(hsetKey, hashField, payload);
+          endTime = performance.now();
+
           commandStats.hSet++;
           break;
         case 3:
           const hgetKey = hgetKeys[Math.floor(Math.random() * hgetKeys.length)]
 
-          await client.hGet(hgetKey, field);
+          startTime = performance.now();
+          await client.hGet(hgetKey, hashField);
+          endTime = performance.now();
+
           commandStats.hGet++;
           break;
         }
           
-        const endTime = performance.now();
         rtt = endTime - startTime;
 
         if (rttAccumulator && rtt > 0) {

@@ -17,29 +17,26 @@ interface CommandStats {
   hGet: number;
 }
 
-
 async function commanderRoutine(
   dataSize: number,
   client: ReturnType<typeof createCluster> | ReturnType<typeof createClient>,
   isRunningRef: RunningRef,
   totalMessagesRef: MessagesRef,
+  getKeys: Array<string>,
+  setKeys: Array<string>,
+  hgetKeys: Array<string>,
+  hsetKeys: Array<string>,
+  hashField: string,
   rttAccumulator?: RttAccumulator | null,
-  rateLimiter?: RateLimiter | null
+  rateLimiter?: RateLimiter | null,
 ): Promise<CommandStats> {
     await client.connect();
 
     const commandStats: CommandStats = { set: 0, get: 0, hSet: 0, hGet: 0 };
-
-    // Define keys and payload
     const payload = 'A'.repeat(dataSize);
-    const stringKey = 'benchmark:string:key';
-    const hashKey = 'benchmark:hash:key';
-    const field = 'benchmark:field';
-    
     let commandType: number = 0;
     while (isRunningRef.value) {
       try {
-        // Apply rate limiting if enabled
         if (rateLimiter) {
           await rateLimiter.acquire();
         }
@@ -47,28 +44,48 @@ async function commanderRoutine(
         commandType = Math.floor(Math.random() * 4);
         let rtt = 0;
 
-        const startTime = performance.now();
-        
+        let startTime: number = 0;
+        let endTime: number = 0;
+
         switch (commandType) {
         case 0:
-          await client.set(stringKey, payload);
+          const setKey = setKeys[Math.floor(Math.random() * setKeys.length)]
+
+          startTime = performance.now();
+          await client.set(setKey, payload);
+          endTime = performance.now();
+
           commandStats.set++;
           break;
         case 1:
-          await client.get(stringKey);
+          const getKey = getKeys[Math.floor(Math.random() * getKeys.length)]
+
+          startTime = performance.now();
+          await client.get(getKey);
+          endTime = performance.now();
+
           commandStats.get++;
           break;
         case 2:
-          await client.hSet(hashKey, field, payload);
+          const hsetKey = hsetKeys[Math.floor(Math.random() * hsetKeys.length)]
+
+          startTime = performance.now();
+          await client.hSet(hsetKey, hashField, payload);
+          endTime = performance.now();
+
           commandStats.hSet++;
           break;
         case 3:
-          await client.hGet(hashKey, field);
+          const hgetKey = hgetKeys[Math.floor(Math.random() * hgetKeys.length)]
+
+          startTime = performance.now();
+          await client.hGet(hgetKey, hashField);
+          endTime = performance.now();
+
           commandStats.hGet++;
           break;
         }
           
-        const endTime = performance.now();
         rtt = endTime - startTime;
 
         if (rttAccumulator && rtt > 0) {

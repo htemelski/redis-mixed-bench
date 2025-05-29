@@ -103,7 +103,7 @@ export async function runBenchmark(argv: BenchmarkArgs): Promise<void> {
 
   let clients: (ReturnType<typeof createCluster> | ReturnType<typeof createClient>)[] = [];
 
-  for (let i = 1; i <= argv.clients; i++) {
+  for (let i = 0; i <= argv.clients; i++) {
     let client;
     if (argv["oss-cluster-api-distribute-subscribers"] === true) {
       client = createCluster(clusterOptions);
@@ -113,19 +113,72 @@ export async function runBenchmark(argv: BenchmarkArgs): Promise<void> {
 
     clients.push(client);
   }
+  if (clients.length < 2) {
+    console.error("not enough clients");
+    process.exit(1);
+  }
 
   const promises: Promise<CommandStats>[] = [];
 
-  const publisherName = `publisher-${Math.random().toString(36).substring(7)}`;
-  const channels: string[] = ['test-channel']; // Add your channel logic here
+  if (argv["hit-rate"] > 100 || argv["hit-rate"] < 0) {
+    console.warn("hit-rate can't be higher than 100 or lower than 0, setting it to the default value");
+    argv["hit-rate"] = 100;
+  }
 
-  for (let clientId = 1; clientId <= argv.clients; clientId++) {
+  const getKeys: Array<string> = [];
+  const hgetKeys: Array<string> = [];
+  const hashField: string = `${argv["key-prefix"]}:field`
+
+  for (let i = 0; i < argv["keys-count"]; i++) {
+    getKeys.push(`${argv["key-prefix"]}:string:${i}`);
+    hgetKeys.push(`${argv["key-prefix"]}:hash:${i}`);
+  }
+
+  const prepClient = clients[0];
+  clients.shift();
+
+  console.log("preparing the server keys");
+  await prepClient.connect();
+
+  const deletePromises: Array<Promise<any>> = [];
+  for (let i = 0; i < argv["keys-count"]; i++) {
+    deletePromises.push(prepClient.del(getKeys[i]));
+    deletePromises.push(prepClient.hDel(hgetKeys[i], hashField));
+  }
+  await Promise.all(deletePromises);
+
+  const setKeys: Array<string> = [];
+  const hsetKeys: Array<string> = [];
+
+  const setKeysCount: number = Math.floor((argv["keys-count"] * (argv["hit-rate"] / 100)))
+
+  for (let i = 0; i < setKeysCount; i++) {
+    setKeys.push(getKeys[i]);
+    hsetKeys.push(hgetKeys[i]);
+  }
+
+  const setPromises: Array<Promise<any>> = [];
+  for (let i = 0; i < setKeysCount; i++) {
+    setPromises.push(prepClient.set(getKeys[i], "someValue"));
+    setPromises.push(prepClient.hSet(hgetKeys[i], hashField, "someValue"));
+  }
+  await Promise.all(setPromises);
+
+  await prepClient.disconnect()
+  console.log("preparation finished");
+
+  for (let clientId = 0; clientId < argv.clients; clientId++) {
     promises.push(
       commanderRoutine(
         argv["data-size"],
-        clients[clientId - 1],
+        clients[clientId],
         isRunningRef,
         totalMessagesRef,
+        getKeys,
+        setKeys,
+        hgetKeys,
+        hsetKeys,
+        hashField,
         rttAccumulator,
         rateLimiter
       )
@@ -201,9 +254,4 @@ export async function runBenchmark(argv: BenchmarkArgs): Promise<void> {
 
   // cleanly exit the process once done
   process.exit(0);
-}
-
-function randomInt(min: number, max: number): number {
-  if (min === max) return min;
-  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
